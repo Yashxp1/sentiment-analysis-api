@@ -1,26 +1,14 @@
-from fastapi import FastAPI, status
-from schema.sentiment import SentimentRequest, SentimentResponse
-from services.sentiment_engine import SentimentEngine
+from fastapi import FastAPI
+
+from app.api.router import api_router
+from app.core.config import get_settings
+
+settings = get_settings()
 
 app = FastAPI(
-    title="Sentiment Analysis API",
+    title=settings.APP_NAME,
     description="An API to analyse input text",
-    version="1.0.0",
+    version=settings.VERSION,
 )
 
-sentiment_engine = SentimentEngine()
-
-
-@app.get("/health", status_code=status.HTTP_200_OK)
-def health_check():
-    return {"status": "healthy", "service": "sentiment-analysis-api"}
-
-
-@app.post(
-    "/analyse",
-    response_model=SentimentResponse,
-    status_code=status.HTTP_200_OK,
-    summary="Analyses sentiment",
-)
-def analyse_sentiment(payload: SentimentRequest):
-    return sentiment_engine.analyse(payload.text)
+app.include_router(api_router, prefix="/api")
